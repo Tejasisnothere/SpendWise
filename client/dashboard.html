@@ -1,16 +1,67 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Dashboard</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <title>SpendWise Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
   <div class="container">
     <h2>Welcome to SpendWise Dashboard</h2>
     <p id="welcome_user">Loading...</p>
+
+    <h2>Add New Expense</h2>
+    <form id="expenseForm">
+      <input type="text" id="title" placeholder="Expense Title" required />
+      <input type="number" id="amount" placeholder="Amount" required />
+      <input type="date" id="date" required />
+      <select id="category">
+        <option value="rent">Rent</option>
+        <option value="groceries">Groceries</option>
+        <option value="travel">Travel</option>
+        <option value="subscription">Subscription</option>
+        <option value="wants">Wants</option>
+        <option value="food">Food</option>
+        <option value="misc" selected>Misc</option>
+        <option value="entertainment">Entertainment</option>
+      </select>
+      <select id="status">
+        <option value="completed" selected>Completed</option>
+        <option value="planned">Planned</option>
+      </select>
+      <input type="date" id="due_date" placeholder="Due Date (if planned)" />
+      <textarea id="description" placeholder="Description (optional)"></textarea>
+      <button type="submit">Add Expense</button>
+    </form>
+
+    <p id="msg" style="color: green;"></p>
+
+    <h2>Expense Trend</h2>
+    <table>
+  <thead>
+    <tr>
+      <th>Title</th>
+      <th>Amount</th>
+      <th>Category</th>
+      <th>Date</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody id="expenses-table-body">
+    <!-- Rows will be injected here -->
+  </tbody>
+</table>
+    <canvas id="stockChart" width="600" height="300"></canvas>
+
     <button onclick="logout()">Logout</button>
   </div>
+
   <script>
+    function loadChart() {
+    // Placeholder: Replace with actual chart drawing logic
+    console.log("loadChart called — add chart rendering here.");
+  }
     const token = localStorage.getItem('token');
     if (!token) window.location.href = 'index.html';
 
@@ -22,6 +73,153 @@
       localStorage.removeItem('user');
       window.location.href = 'index.html';
     }
+
+    document.getElementById('expenseForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const title = document.getElementById('title').value;
+      const amount = parseFloat(document.getElementById('amount').value);
+      const date = document.getElementById('date').value;
+      const category = document.getElementById('category').value;
+      const status = document.getElementById('status').value;
+      const due_date = document.getElementById('due_date').value || null;
+      const description = document.getElementById('description').value;
+
+      try {
+  const res = await fetch('http://localhost:5000/api/expenses', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({ title, amount, category, date, status, due_date, description })
+  });
+
+  const resultText = await res.text();
+  console.log("🔍 Raw response:", resultText);
+
+  if (!res.ok) {
+    document.getElementById('msg').textContent = `❌ Error: ${resultText}`;
+    return;
+  }
+
+  const result = JSON.parse(resultText);
+  document.getElementById('msg').textContent = result.message || '✅ Expense added!';
+  document.getElementById('expenseForm').reset();
+  
+} catch (err) {
+  console.error('Catch error:', err);
+  document.getElementById('msg').textContent = '❌ Error adding expense.';
+}
+
+    });
+    
+
+
+
+
+    async function fetchExpenses() {
+  try {
+    const token = localStorage.getItem("token");
+
+    const response = await fetch("http://localhost:5000/api/expenses", {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch expenses");
+    }
+
+    const expenses = await response.json();
+    console.log("Expenses:", expenses);
+
+    renderExpenses(expenses);  // optional: render them in table or list
+
+  } catch (error) {
+    console.error("Error loading expenses:", error);
+  }
+}
+
+
+
+
+function renderExpenses(expenses) {
+  const table = document.getElementById("expenses-table-body"); // Assuming a <tbody> exists
+
+  table.innerHTML = ""; // Clear existing
+
+  expenses.forEach(exp => {
+    const row = document.createElement("tr");
+
+    row.innerHTML = `
+      <td>${exp.title}</td>
+      <td>${exp.amount}</td>
+      <td>${exp.category}</td>
+      <td>${new Date(exp.date).toLocaleDateString()}</td>
+      <td>${exp.status}</td>
+    `;
+
+    table.appendChild(row);
+  });
+}
+
+
+window.onload = () => {
+  fetchExpenses();
+};
+
+
+    // async function loadChart() {
+    //   try {
+    //     const res = await fetch('http://localhost:3000/api/expenses', {
+    //       headers: {
+    //         Authorization: `Bearer ${token}`
+    //       }
+    //     });
+    //     const data = await res.json();
+
+    //     const labels = data.map(exp => new Date(exp.date).toLocaleDateString());
+    //     const amounts = data.map(exp => exp.amount);
+
+    //     const ctx = document.getElementById('stockChart').getContext('2d');
+    //     new Chart(ctx, {
+    //       type: 'line',
+    //       data: {
+    //         labels,
+    //         datasets: [{
+    //           label: 'Expenses Over Time',
+    //           data: amounts,
+    //           fill: false,
+    //           borderColor: '#4bc0c0',
+    //           tension: 0.3,
+    //           pointRadius: 5,
+    //           pointBackgroundColor: '#4bc0c0'
+    //         }]
+    //       },
+    //       options: {
+    //         responsive: true,
+    //         plugins: {
+    //           title: {
+    //             display: true,
+    //             text: 'Expense Trend'
+    //           }
+    //         },
+    //         scales: {
+    //           y: {
+    //             beginAtZero: true
+    //           }
+    //         }
+    //       }
+    //     });
+    //   } catch (error) {
+    //     console.error('Chart Load Error:', error);
+    //   }
+    // }
+
+    // loadChart(); // initial call
   </script>
 </body>
 </html>

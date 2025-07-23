@@ -3,13 +3,16 @@
 require('dotenv').config(); // Load env variables first
 
 const express = require('express');
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
+mongoose.set("debug", true);
 
 const app = express();
 const port = process.env.PORT || 3000;
 
 const path = require('path');
 app.use(express.static(path.join(__dirname, '../client')));
+
+
 
 // Middleware
 app.use(express.json());
