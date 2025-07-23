@@ -1,0 +1,51 @@
+# === Node.js ===
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.env
+.env.*
+
+
+# === Python ===
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+venv/
+env/
+*.sqlite3
+model.pkl
+*.h5
+*.joblib
+
+# Flask-related
+instance/
+*.db
+*.log
+
+# === Frontend (Vanilla JS) ===
+# (only if you later add bundlers like Webpack)
+dist/
+build/
+*.cache
+
+# === OS-specific ===
+.DS_Store
+Thumbs.db
+
+# === Jupyter / Notebooks ===
+.ipynb_checkpoints/
+
+# === Logs & Misc ===
+*.log
+*.bak
+*.swp
+
+# === IDEs ===
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
