@@ -5,7 +5,7 @@ async function signup() {
   const email = document.getElementById('signup_email').value;
   const password = document.getElementById('signup_password').value;
 
-  const res = await fetch(`${API_BASE}/signup`, {
+  const res = await fetch(`${API_BASE}/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ name, email, password })
