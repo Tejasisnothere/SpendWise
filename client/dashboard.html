@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h2>Welcome to SpendWise Dashboard</h2>
+    <p id="welcome_user">Loading...</p>
+    <button onclick="logout()">Logout</button>
+  </div>
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = 'index.html';
+
+    const user = JSON.parse(localStorage.getItem('user'));
+    document.getElementById('welcome_user').innerText = `Hello, ${user?.name || 'User'}!`;
+
+    function logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = 'index.html';
+    }
+  </script>
+</body>
+</html>
